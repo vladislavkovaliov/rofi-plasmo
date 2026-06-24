@@ -1,13 +1,14 @@
-import type { PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging";
 
-const handler: PlasmoMessaging.MessageHandler<{}, { granted: boolean }> = async (
-  _req,
-  res,
-) => {
-  const granted = await chrome.permissions.request({
-    permissions: ["history"],
-  })
-  res.send({ granted })
-}
+const handler: PlasmoMessaging.MessageHandler<
+    object,
+    { granted: boolean }
+> = async (_req, res) => {
+    const granted = await chrome.permissions.request({
+        permissions: ["history"],
+    });
 
-export default handler
+    res.send({ granted });
+};
+
+export default handler;

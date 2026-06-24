@@ -1,12 +1,15 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react";
 
 export function useVisibilityChange(handler: (hidden: boolean) => void): void {
-  const savedHandler = useRef(handler)
-  savedHandler.current = handler
+    const savedHandler = useRef(handler);
 
-  useEffect(() => {
-    const listener = () => savedHandler.current(document.hidden)
-    document.addEventListener("visibilitychange", listener)
-    return () => document.removeEventListener("visibilitychange", listener)
-  }, [])
+    savedHandler.current = handler;
+
+    useEffect(() => {
+        const listener = () => savedHandler.current(document.hidden);
+
+        document.addEventListener("visibilitychange", listener);
+
+        return () => document.removeEventListener("visibilitychange", listener);
+    }, []);
 }

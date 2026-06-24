@@ -1,14 +1,53 @@
-import type { PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging";
+
+export type TabData = {
+    id: number;
+    title: string;
+    url: string;
+    favIconUrl: string;
+    windowId: number;
+    active: boolean;
+};
 
 export type WindowTabsData = {
-  tabs: chrome.tabs.Tab[]
-}
+    tabs: TabData[];
+    focusedWindowId: number | null;
+};
 
-const handler: PlasmoMessaging.MessageHandler<{}, WindowTabsData> = async (req, res) => {
-  const tabs = await chrome.tabs
-    .query({ currentWindow: true })
-    .catch(() => [])
-  res.send({ tabs })
-}
+const handler: PlasmoMessaging.MessageHandler<
+    object,
+    WindowTabsData
+> = async () => {
+    const [tabs, focusedWindow] = await Promise.all([
+        chrome.tabs.query({}).catch(() => [] as chrome.tabs.Tab[]),
+        chrome.windows.getLastFocused().catch(() => null),
+    ]);
 
-export default handler
+    const tabData: TabData[] = tabs.map((t) => ({
+        id: t.id ?? 0,
+        title: t.title ?? "(no title)",
+        url: t.url ?? "",
+        favIconUrl: t.favIconUrl ?? "",
+        windowId: t.windowId ?? 0,
+        active: t.active ?? false,
+    }));
+
+    console.log(
+        "[rofi] tabs fetched:",
+        tabData.length,
+        "focused window:",
+        focusedWindow?.id,
+    );
+    for (const t of tabData) {
+        console.log(
+            "[rofi]   tab windowId:",
+            t.windowId,
+            "title:",
+            t.title.slice(0, 40),
+        );
+    }
+
+    res.send({ tabs: tabData, focusedWindowId: focusedWindow?.id ?? null });
+};
+
+export default handler;

@@ -1,93 +1,109 @@
-import { useState, useEffect, useCallback, useMemo } from "react"
-import { sendToBackground } from "@plasmohq/messaging"
-import type { HistoryData } from "~background/messages/get-history"
-import { useKeyDown } from "~hooks/useKeyDown"
+import type { HistoryData } from "~background/messages/get-history";
+
+import { sendToBackground } from "@plasmohq/messaging";
+import { useState, useEffect, useCallback, useMemo } from "react";
+import { useKeyDown } from "~hooks/useKeyDown";
 
 export function useHistoryList(
-  visible: boolean,
-  query: string,
-  container?: HTMLElement | null,
+    visible: boolean,
+    query: string,
+    container?: HTMLElement | null,
 ) {
-  const [items, setItems] = useState<chrome.history.HistoryItem[]>([])
-  const [selectedIndex, setSelectedIndex] = useState(0)
-  const [permissionGranted, setPermissionGranted] = useState(true)
+    const [items, setItems] = useState<chrome.history.HistoryItem[]>([]);
+    const [selectedIndex, setSelectedIndex] = useState(0);
+    const [permissionGranted, setPermissionGranted] = useState(true);
 
-  const filteredItems = useMemo(() => {
-    const q = query.toLowerCase().trim()
-    if (!q) return items
-    return items.filter(
-      (item) =>
-        item.title?.toLowerCase().includes(q) ||
-        item.url?.toLowerCase().includes(q),
-    )
-  }, [items, query])
+    const filteredItems = useMemo(() => {
+        const q = query.toLowerCase().trim();
+        if (!q) {
+            return items;
+        }
 
-  useEffect(() => {
-    if (!visible) {
-      setItems([])
-      setSelectedIndex(0)
-      setPermissionGranted(true)
-      return
-    }
+        return items.filter(
+            (item) =>
+                item.title?.toLowerCase().includes(q) ||
+                item.url?.toLowerCase().includes(q),
+        );
+    }, [items, query]);
 
-    sendToBackground<{}, HistoryData>({ name: "get-history" }).then((res) => {
-      setItems(res.items)
-      setPermissionGranted(res.granted)
-    })
-  }, [visible])
+    useEffect(() => {
+        if (!visible) {
+            setItems([]);
+            setSelectedIndex(0);
+            setPermissionGranted(true);
 
-  useEffect(() => {
-    setSelectedIndex(0)
-  }, [query])
+            return;
+        }
 
-  const selectNext = useCallback(() => {
-    setSelectedIndex((i) => Math.min(i + 1, filteredItems.length - 1))
-  }, [filteredItems.length])
+        sendToBackground<object, HistoryData>({ name: "get-history" }).then(
+            (res) => {
+                setItems(res.items);
+                setPermissionGranted(res.granted);
+            },
+        );
+    }, [visible]);
 
-  const selectPrev = useCallback(() => {
-    setSelectedIndex((i) => Math.max(i - 1, 0))
-  }, [])
+    useEffect(() => {
+        setSelectedIndex(0);
+    }, [query]);
 
-  const openItem = useCallback((url: string) => {
-    sendToBackground({ name: "open-url", body: { url } })
-  }, [])
+    const selectNext = useCallback(() => {
+        setSelectedIndex((i) => Math.min(i + 1, filteredItems.length - 1));
+    }, [filteredItems.length]);
 
-  const requestPermission = useCallback(async () => {
-    const res = await sendToBackground<{}, { granted: boolean }>({
-      name: "request-history-permission",
-    })
-    if (res.granted) {
-      setPermissionGranted(true)
-      const data = await sendToBackground<{}, HistoryData>({
-        name: "get-history",
-      })
-      setItems(data.items)
-    }
-    return res.granted
-  }, [])
+    const selectPrev = useCallback(() => {
+        setSelectedIndex((i) => Math.max(i - 1, 0));
+    }, []);
 
-  useKeyDown(
-    (e) => {
-      if (!visible || filteredItems.length === 0) return
+    const openItem = useCallback((url: string) => {
+        sendToBackground({ name: "open-url", body: { url } });
+    }, []);
 
-      if (e.key === "ArrowDown") {
-        e.preventDefault()
-        selectNext()
-      }
+    const requestPermission = useCallback(async () => {
+        const res = await sendToBackground<object, { granted: boolean }>({
+            name: "request-history-permission",
+        });
+        if (res.granted) {
+            setPermissionGranted(true);
+            const data = await sendToBackground<object, HistoryData>({
+                name: "get-history",
+            });
 
-      if (e.key === "ArrowUp") {
-        e.preventDefault()
-        selectPrev()
-      }
+            setItems(data.items);
+        }
 
-      if (e.key === "Enter") {
-        e.preventDefault()
-        const item = filteredItems[selectedIndex]
-        if (item?.url) openItem(item.url)
-      }
-    },
-    container,
-  )
+        return res.granted;
+    }, []);
 
-  return { items: filteredItems, selectedIndex, openItem, permissionGranted, requestPermission }
+    useKeyDown((e) => {
+        if (!visible || filteredItems.length === 0) {
+            return;
+        }
+
+        if (e.key === "ArrowDown") {
+            e.preventDefault();
+            selectNext();
+        }
+
+        if (e.key === "ArrowUp") {
+            e.preventDefault();
+            selectPrev();
+        }
+
+        if (e.key === "Enter") {
+            e.preventDefault();
+            const item = filteredItems[selectedIndex];
+            if (item?.url) {
+                openItem(item.url);
+            }
+        }
+    }, container);
+
+    return {
+        items: filteredItems,
+        selectedIndex,
+        openItem,
+        permissionGranted,
+        requestPermission,
+    };
 }

@@ -1,20 +1,23 @@
-import cssText from "data-text:./style.css"
-import type { PlasmoGetStyle } from "plasmo"
+import type { PlasmoGetStyle } from "plasmo";
+
+import cssText from "data-text:./style.css";
 
 export const config = {
-  matches: ["<all_urls>"]
-}
+    matches: ["<all_urls>"],
+};
 
 export const getStyle: PlasmoGetStyle = () => {
-  const style = document.createElement("style")
-  style.textContent = cssText
-  return style
-}
+    const style = document.createElement("style");
 
-import RofiOverlay from "~components/RofiOverlay"
+    style.textContent = cssText;
+
+    return style;
+};
+
+import RofiOverlay from "~components/RofiOverlay";
 
 const Content = () => {
-  return <RofiOverlay />
-}
+    return <RofiOverlay />;
+};
 
-export default Content
+export default Content;

@@ -1,18 +1,23 @@
-import { useEffect, useRef } from "react"
+import { useEffect, useRef } from "react";
 
 export function useKeyDown(
-  handler: (e: KeyboardEvent) => void,
-  element?: HTMLElement | Document | null,
+    handler: (e: KeyboardEvent) => void,
+    element?: HTMLElement | Document | null,
 ): void {
-  const savedHandler = useRef(handler)
-  savedHandler.current = handler
+    const savedHandler = useRef(handler);
 
-  useEffect(() => {
-    const target = element === undefined ? document : element
-    if (!target) return
+    savedHandler.current = handler;
 
-    const listener = (e: KeyboardEvent) => savedHandler.current(e)
-    target.addEventListener("keydown", listener)
-    return () => target.removeEventListener("keydown", listener)
-  }, [element])
+    useEffect(() => {
+        const target = element === undefined ? document : element;
+        if (!target) {
+            return;
+        }
+
+        const listener = (e: KeyboardEvent) => savedHandler.current(e);
+
+        target.addEventListener("keydown", listener);
+
+        return () => target.removeEventListener("keydown", listener);
+    }, [element]);
 }

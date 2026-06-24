@@ -1,27 +1,29 @@
-import type { PlasmoMessaging } from "@plasmohq/messaging"
+import type { PlasmoMessaging } from "@plasmohq/messaging";
 
 export type HistoryData = {
-  items: chrome.history.HistoryItem[]
-  granted: boolean
-}
+    items: chrome.history.HistoryItem[];
+    granted: boolean;
+};
 
-const handler: PlasmoMessaging.MessageHandler<{}, HistoryData> = async (
-  _req,
-  res,
+const handler: PlasmoMessaging.MessageHandler<object, HistoryData> = async (
+    _req,
+    res,
 ) => {
-  const hasPermission = await chrome.permissions.contains({
-    permissions: ["history"],
-  })
+    const hasPermission = await chrome.permissions.contains({
+        permissions: ["history"],
+    });
 
-  if (!hasPermission) {
-    res.send({ items: [], granted: false })
-    return
-  }
+    if (!hasPermission) {
+        res.send({ items: [], granted: false });
 
-  const items = await chrome.history
-    .search({ text: "", maxResults: 50, startTime: 0 })
-    .catch(() => [])
-  res.send({ items, granted: true })
-}
+        return;
+    }
 
-export default handler
+    const items = await chrome.history
+        .search({ text: "", maxResults: 50, startTime: 0 })
+        .catch(() => []);
+
+    res.send({ items, granted: true });
+};
+
+export default handler;
