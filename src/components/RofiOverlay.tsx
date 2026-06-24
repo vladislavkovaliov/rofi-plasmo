@@ -112,6 +112,8 @@ const RofiOverlay = () => {
     items: historyItems,
     selectedIndex: historyIndex,
     openItem,
+    permissionGranted,
+    requestPermission,
   } = useHistoryList(
     visible && mode === "history",
     query,
@@ -204,7 +206,33 @@ const RofiOverlay = () => {
           onChange={(e) => setQuery(e.target.value)}
         />
         <div ref={listRef} style={styles.list}>
-          {currentItems.map((item: any, i) => (
+          {mode === "history" && !permissionGranted ? (
+            <div
+              style={{
+                padding: 32,
+                textAlign: "center" as const,
+                color: "#6c7086",
+              }}
+            >
+              <div style={{ marginBottom: 12 }}>
+                Grant history access in extension settings
+              </div>
+              <button
+                onClick={requestPermission}
+                style={{
+                  padding: "8px 24px",
+                  background: "#e65100",
+                  color: "#fff",
+                  border: "none",
+                  borderRadius: 6,
+                  cursor: "pointer",
+                  fontSize: 13,
+                }}
+              >
+                Grant access
+              </button>
+            </div>
+          ) : currentItems.map((item: any, i) => (
             <div
               key={item.id ?? item.url ?? i}
               style={styles.item(i === selectedIndex)}

@@ -10,6 +10,7 @@ export function useHistoryList(
 ) {
   const [items, setItems] = useState<chrome.history.HistoryItem[]>([])
   const [selectedIndex, setSelectedIndex] = useState(0)
+  const [permissionGranted, setPermissionGranted] = useState(true)
 
   const filteredItems = useMemo(() => {
     const q = query.toLowerCase().trim()
@@ -25,11 +26,13 @@ export function useHistoryList(
     if (!visible) {
       setItems([])
       setSelectedIndex(0)
+      setPermissionGranted(true)
       return
     }
 
     sendToBackground<{}, HistoryData>({ name: "get-history" }).then((res) => {
       setItems(res.items)
+      setPermissionGranted(res.granted)
     })
   }, [visible])
 
@@ -47,6 +50,20 @@ export function useHistoryList(
 
   const openItem = useCallback((url: string) => {
     sendToBackground({ name: "open-url", body: { url } })
+  }, [])
+
+  const requestPermission = useCallback(async () => {
+    const res = await sendToBackground<{}, { granted: boolean }>({
+      name: "request-history-permission",
+    })
+    if (res.granted) {
+      setPermissionGranted(true)
+      const data = await sendToBackground<{}, HistoryData>({
+        name: "get-history",
+      })
+      setItems(data.items)
+    }
+    return res.granted
   }, [])
 
   useKeyDown(
@@ -72,5 +89,5 @@ export function useHistoryList(
     container,
   )
 
-  return { items: filteredItems, selectedIndex, openItem }
+  return { items: filteredItems, selectedIndex, openItem, permissionGranted, requestPermission }
 }

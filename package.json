@@ -31,7 +31,8 @@
         "description": "Toggle Rofi overlay"
       }
     },
-    "permissions": ["tabs", "tabGroups", "history", "storage"],
+    "permissions": ["tabs", "tabGroups", "storage"],
+    "optional_permissions": ["history"],
     "host_permissions": ["<all_urls>"]
   }
 }
