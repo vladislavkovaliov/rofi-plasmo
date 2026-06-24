@@ -1,0 +1,37 @@
+{
+  "name": "rofi-switcher",
+  "version": "0.1.0",
+  "description": "A window switcher and launcher inspired by Rofi",
+  "scripts": {
+    "dev": "plasmo dev",
+    "build": "plasmo build"
+  },
+  "dependencies": {
+    "react": "^18.2.0",
+    "react-dom": "^18.2.0",
+    "@plasmohq/messaging": "^0.7.0",
+    "@plasmohq/storage": "^1.8.0",
+    "plasmo": "^0.90.0"
+  },
+  "devDependencies": {
+    "@types/react": "^18.2.0",
+    "@types/react-dom": "^18.2.0",
+    "typescript": "^5.3.0"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": ["@parcel/watcher", "@swc/core", "esbuild", "lmdb", "msgpackr-extract", "sharp"]
+  },
+  "manifest": {
+    "name": "Rofi Switcher",
+    "version": "0.1.0",
+    "description": "A window switcher and launcher inspired by Rofi",
+    "commands": {
+      "toggle-rofi": {
+        "suggested_key": { "default": "Ctrl+Space" },
+        "description": "Toggle Rofi overlay"
+      }
+    },
+    "permissions": ["tabs", "tabGroups", "history", "storage"],
+    "host_permissions": ["<all_urls>"]
+  }
+}

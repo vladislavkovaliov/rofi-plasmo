@@ -1,0 +1,11 @@
+:host {
+  --rofi-bg: #1e1e2e;
+  --rofi-fg: #cdd6f4;
+  --rofi-accent: #89b4fa;
+  --rofi-accent-hover: #74c7ec;
+  --rofi-selected-bg: #313244;
+  --rofi-border-radius: 12px;
+  --rofi-font: 'Iosevka', 'JetBrains Mono', 'Fira Code', monospace;
+  --rofi-font-size: 14px;
+  --rofi-z-index: 2147483647;
+}
