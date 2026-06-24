@@ -145,9 +145,6 @@ const RofiOverlay = () => {
   .on(() => mode === "history", historyIndex)
   .build(() => commandsIndex);
 
-  // const currentItems = mode === "tabs" ? tabs : mode === "history" ? historyItems : commands
-  // const selectedIndex = mode === "tabs" ? tabIndex : mode === "history" ? historyIndex : commandsIndex
-
   const inputRef = useRef<HTMLInputElement>(null)
   const listRef = useRef<HTMLDivElement>(null)
 
@@ -176,8 +173,10 @@ const RofiOverlay = () => {
   }, [query, mode])
 
   useEffect(() => {
-    if (!listRef.current) return
-    const el = listRef.current.children[selectedIndex] as HTMLElement
+    if (!listRef.current) {
+      return;
+    }
+    const el = listRef.current.children[selectedIndex?] as HTMLElement
     el?.scrollIntoView({ block: "nearest" })
   }, [selectedIndex, currentItems.length])
 
@@ -198,7 +197,9 @@ const RofiOverlay = () => {
   // Режим переключения — на контейнере оверлея
   useKeyDown(
     (e) => {
-      if (!visible) return
+      if (!visible) {
+        return;
+      }
 
       if (e.key === "ArrowLeft") {
         e.preventDefault()
