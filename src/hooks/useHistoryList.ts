@@ -15,14 +15,15 @@ export function useHistoryList(
 
     const filteredItems = useMemo(() => {
         const q = query.toLowerCase().trim();
+
         if (!q) {
             return items;
         }
 
         return items.filter(
-            (item) =>
-                item.title?.toLowerCase().includes(q) ||
-                item.url?.toLowerCase().includes(q),
+            (item) => {
+                return item.title?.toLowerCase().includes(q) || item.url?.toLowerCase().includes(q);
+            }
         );
     }, [items, query]);
 
@@ -63,8 +64,10 @@ export function useHistoryList(
         const res = await sendToBackground<object, { granted: boolean }>({
             name: "request-history-permission",
         });
+        
         if (res.granted) {
             setPermissionGranted(true);
+
             const data = await sendToBackground<object, HistoryData>({
                 name: "get-history",
             });

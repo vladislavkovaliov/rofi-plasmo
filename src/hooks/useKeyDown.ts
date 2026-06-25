@@ -10,11 +10,12 @@ export function useKeyDown(
 
     useEffect(() => {
         const target = element === undefined ? document : element;
+        
         if (!target) {
             return;
         }
 
-        const listener = (e: KeyboardEvent) => savedHandler.current(e);
+        const listener = (e: Event) => savedHandler.current(e as KeyboardEvent);
 
         target.addEventListener("keydown", listener);
 

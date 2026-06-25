@@ -228,18 +228,17 @@ const RofiOverlay = () => {
 
             if (e.key === "ArrowLeft") {
                 e.preventDefault();
-                const idx = MODE_ORDER.indexOf(mode);
 
-                setMode(
-                    MODE_ORDER[
-                        (idx - 1 + MODE_ORDER.length) % MODE_ORDER.length
-                    ],
-                );
+                const idx = MODE_ORDER.indexOf(mode);
+                const modeOrder = MODE_ORDER[(idx - 1 + MODE_ORDER.length) % MODE_ORDER.length]
+
+                setMode(modeOrder);
                 setQuery("");
             }
 
             if (e.key === "ArrowRight") {
                 e.preventDefault();
+
                 const idx = MODE_ORDER.indexOf(mode);
 
                 setMode(MODE_ORDER[(idx + 1) % MODE_ORDER.length]);
@@ -299,7 +298,9 @@ const RofiOverlay = () => {
 
             if (e.key === "Enter") {
                 e.preventDefault();
+
                 const cmd = commands[commandsIndex];
+                
                 if (!cmd) {
                     return;
                 }

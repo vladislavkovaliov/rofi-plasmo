@@ -10,12 +10,13 @@ export function useEscape(
 
     useEffect(() => {
         const target = element === undefined ? document : element;
+
         if (!target) {
             return;
         }
 
-        const listener = (e: KeyboardEvent) => {
-            if (e.key === "Escape") {
+        const listener = (e: Event) => {
+            if ((e as KeyboardEvent).key === "Escape") {
                 savedHandler.current();
             }
         };

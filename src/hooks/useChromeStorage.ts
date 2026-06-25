@@ -17,6 +17,7 @@ export function useChromeStorage<T>(
 
     const set = async (newValue: T) => {
         setValue(newValue);
+        
         await setStorageValue(key, newValue);
     };
 

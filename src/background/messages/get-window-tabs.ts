@@ -32,21 +32,6 @@ const handler: PlasmoMessaging.MessageHandler<
         active: t.active ?? false,
     }));
 
-    console.log(
-        "[rofi] tabs fetched:",
-        tabData.length,
-        "focused window:",
-        focusedWindow?.id,
-    );
-    for (const t of tabData) {
-        console.log(
-            "[rofi]   tab windowId:",
-            t.windowId,
-            "title:",
-            t.title.slice(0, 40),
-        );
-    }
-
     res.send({ tabs: tabData, focusedWindowId: focusedWindow?.id ?? null });
 };
 
