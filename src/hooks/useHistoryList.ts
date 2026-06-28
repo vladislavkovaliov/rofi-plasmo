@@ -2,7 +2,7 @@ import type { HistoryData } from "~background/messages/get-history";
 
 import { sendToBackground } from "@plasmohq/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useKeyDown } from "~hooks/useKeyDown";
+
 
 export function useHistoryList(
     visible: boolean,
@@ -79,35 +79,13 @@ export function useHistoryList(
         return res.granted;
     }, []);
 
-    useKeyDown((e) => {
-        if (!visible || filteredItems.length === 0) {
-            return;
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            selectNext();
-        }
-
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            selectPrev();
-        }
-
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const item = filteredItems[selectedIndex];
-            if (item?.url) {
-                openItem(item.url);
-            }
-        }
-    }, container);
-
     return {
         items: filteredItems,
         selectedIndex,
         openItem,
         permissionGranted,
         requestPermission,
+        selectNext,
+        selectPrev,
     };
 }

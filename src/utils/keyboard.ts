@@ -9,3 +9,17 @@ export function formatKeyName(key: string): string {
 
     return key.length === 1 ? key.toUpperCase() : key;
 }
+
+export const KEYS = {
+    ARROW_UP: "ArrowUp",
+    ARROW_DOWN: "ArrowDown",
+    ARROW_LEFT: "ArrowLeft",
+    ARROW_RIGHT: "ArrowRight",
+    ENTER: "Enter",
+    ESCAPE: "Escape",
+} as const;
+
+export const MODIFIER = {
+    MAC: "Meta",
+    PC: "Ctrl",
+} as const;

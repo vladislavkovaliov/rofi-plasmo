@@ -5,7 +5,7 @@ import type {
 
 import { sendToBackground } from "@plasmohq/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useKeyDown } from "~hooks/useKeyDown";
+import { DEBUG } from "~utils/debug";
 
 export type DisplayItem =
     | { type: "header"; windowId: number; title: string }
@@ -88,22 +88,24 @@ export function useTabList(
         return items;
     }, [filteredTabs, focusedWindowId]);
 
-    console.log(
-        "[rofi] useTabList: allTabs",
-        tabs.length,
-        "filtered",
-        filteredTabs.length,
-        "displayItems",
-        displayItems.length,
-    );
-    for (const item of displayItems) {
-        if (item.type === "header") {
-            console.log(
-                "[rofi]   header:",
-                item.title,
-                "windowId:",
-                item.windowId,
-            );
+    if (DEBUG) {
+        console.log(
+            "[rofi] useTabList: allTabs",
+            tabs.length,
+            "filtered",
+            filteredTabs.length,
+            "displayItems",
+            displayItems.length,
+        );
+        for (const item of displayItems) {
+            if (item.type === "header") {
+                console.log(
+                    "[rofi]   header:",
+                    item.title,
+                    "windowId:",
+                    item.windowId,
+                );
+            }
         }
     }
 
@@ -124,19 +126,21 @@ export function useTabList(
         sendToBackground<object, WindowTabsData>({
             name: "get-window-tabs",
         }).then((res) => {
-            console.log(
-                "[rofi] received from background: tabs",
-                res.tabs.length,
-                "focused",
-                res.focusedWindowId,
-            );
-            for (const t of res.tabs) {
+            if (DEBUG) {
                 console.log(
-                    "[rofi]   tab windowId:",
-                    t.windowId,
-                    "title:",
-                    t.title.slice(0, 40),
+                    "[rofi] received from background: tabs",
+                    res.tabs.length,
+                    "focused",
+                    res.focusedWindowId,
                 );
+                for (const t of res.tabs) {
+                    console.log(
+                        "[rofi]   tab windowId:",
+                        t.windowId,
+                        "title:",
+                        t.title.slice(0, 40),
+                    );
+                }
             }
 
             setTabs(res.tabs);
@@ -182,29 +186,5 @@ export function useTabList(
         });
     }, []);
 
-    useKeyDown((e) => {
-        if (!visible || selectableCount === 0) {
-            return;
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            selectNext();
-        }
-
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            selectPrev();
-        }
-
-        if (e.key === "Enter") {
-            e.preventDefault();
-            const item = displayItems[selectedIndex];
-            if (item?.type === "tab" && item.tab.id && item.tab.windowId) {
-                switchToTab(item.tab.id, item.tab.windowId);
-            }
-        }
-    }, container);
-
-    return { items: displayItems, selectedIndex, switchToTab };
+    return { items: displayItems, selectedIndex, switchToTab, selectNext, selectPrev };
 }

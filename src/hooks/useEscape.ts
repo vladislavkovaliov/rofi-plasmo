@@ -1,4 +1,5 @@
 import { useEffect, useRef } from "react";
+import { KEYS } from "~utils/keyboard";
 
 export function useEscape(
     handler: () => void,
@@ -16,7 +17,7 @@ export function useEscape(
         }
 
         const listener = (e: Event) => {
-            if ((e as KeyboardEvent).key === "Escape") {
+            if ((e as KeyboardEvent).key === KEYS.ESCAPE) {
                 savedHandler.current();
             }
         };

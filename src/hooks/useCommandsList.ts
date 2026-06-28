@@ -1,6 +1,6 @@
 import { useState, useEffect, useCallback, useMemo } from "react";
-import { useKeyDown } from "~hooks/useKeyDown";
 import { COMMANDS } from "~utils/commands";
+import { getCommandFragment } from "~utils/query";
 
 export function useCommandsList(
     visible: boolean,
@@ -14,7 +14,7 @@ export function useCommandsList(
             return [];
         }
 
-        const fragment = query.slice(1).trim();
+        const fragment = getCommandFragment(query);
         if (!fragment) {
             return COMMANDS;
         }
@@ -40,21 +40,5 @@ export function useCommandsList(
         setSelectedIndex((i) => Math.max(i - 1, 0));
     }, []);
 
-    useKeyDown((e) => {
-        if (!visible || filteredCommands.length === 0) {
-            return;
-        }
-
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            selectNext();
-        }
-
-        if (e.key === "ArrowUp") {
-            e.preventDefault();
-            selectPrev();
-        }
-    }, container);
-
-    return { commands: filteredCommands, selectedIndex };
+    return { commands: filteredCommands, selectedIndex, selectNext, selectPrev };
 }

@@ -3,6 +3,7 @@ import { getStorageValue, setStorageValue } from "~chrome/storage";
 import { sendMessageToActiveTab } from "~chrome/tabs";
 import { useChromeStorage } from "~hooks/useChromeStorage";
 import { parseKeyCombo } from "~utils/parseKyCombo";
+import { capitalize } from "~utils/text";
 
 const THEMES = ["default", "pink", "glass"];
 
@@ -174,7 +175,7 @@ function Popup() {
                 >
                     {THEMES.map((t) => (
                         <option key={t} value={t}>
-                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                            {capitalize(t)}
                         </option>
                     ))}
                 </select>
