@@ -15,9 +15,14 @@ export const getStyle: PlasmoGetStyle = () => {
 };
 
 import RofiOverlay from "~components/RofiOverlay";
+import { ThemeProvider } from "~contexts/ThemeContext";
 
 const Content = () => {
-    return <RofiOverlay />;
+    return (
+        <ThemeProvider>
+            <RofiOverlay />
+        </ThemeProvider>
+    );
 };
 
 export default Content;

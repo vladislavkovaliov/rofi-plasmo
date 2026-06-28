@@ -38,6 +38,7 @@ export function useTabList(
     const displayItems = useMemo(() => {
         const seen = new Set<number>();
         const windowIds: number[] = [];
+
         for (const tab of filteredTabs) {
             if (!seen.has(tab.windowId)) {
                 seen.add(tab.windowId);
@@ -58,17 +59,18 @@ export function useTabList(
         });
 
         const items: DisplayItem[] = [];
-        let windowCounter = 0;
 
-        console.log(windowIds);
+        let windowCounter = 0;
 
         for (const wid of windowIds) {
             const winTabs = filteredTabs.filter((t) => t.windowId === wid);
+
             if (winTabs.length === 0) {
                 continue;
             }
 
             windowCounter++;
+
             items.push({
                 type: "header",
                 windowId: wid,
@@ -77,6 +79,7 @@ export function useTabList(
                         ? "Current Window"
                         : `Window ${windowCounter}`,
             });
+
             for (const tab of winTabs) {
                 items.push({ type: "tab", tab });
             }

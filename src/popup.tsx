@@ -1,7 +1,10 @@
 import { useState, useEffect } from "react";
+import { getStorageValue, setStorageValue } from "~chrome/storage";
 import { sendMessageToActiveTab } from "~chrome/tabs";
 import { useChromeStorage } from "~hooks/useChromeStorage";
 import { parseKeyCombo } from "~utils/parseKyCombo";
+
+const THEMES = ["default", "pink", "glass"];
 
 function Popup() {
     const [shortcut, setShortcut] = useChromeStorage(
@@ -11,6 +14,23 @@ function Popup() {
     const [recording, setRecording] = useState(false);
     const [saved, setSaved] = useState(false);
     const [historyGranted, setHistoryGranted] = useState<boolean | null>(null);
+    const [currentTheme, setCurrentTheme] = useState("default");
+
+    useEffect(() => {
+        getStorageValue<string>("theme").then((val) => {
+            if (val) {
+                setCurrentTheme(val);
+            }
+        });
+    }, []);
+
+    const handleThemeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        const theme = e.target.value;
+
+        setCurrentTheme(theme);
+        setStorageValue("theme", theme);
+        sendMessageToActiveTab({ type: "theme-changed", theme });
+    };
 
     useEffect(() => {
         chrome.permissions
@@ -119,6 +139,46 @@ function Popup() {
             >
                 Toggle overlay
             </button>
+
+            <div
+                style={{
+                    borderTop: "1px solid #eee",
+                    paddingTop: 12,
+                    marginBottom: 12,
+                }}
+            >
+                <label
+                    style={{
+                        fontSize: 12,
+                        color: "#666",
+                        display: "block",
+                        marginBottom: 4,
+                    }}
+                >
+                    Theme
+                </label>
+                <select
+                    value={currentTheme}
+                    onChange={handleThemeChange}
+                    style={{
+                        width: "100%",
+                        padding: "8px 10px",
+                        boxSizing: "border-box",
+                        border: "1px solid #ccc",
+                        borderRadius: 6,
+                        fontSize: 13,
+                        outline: "none",
+                        background: "#fff",
+                        color: "#333",
+                    }}
+                >
+                    {THEMES.map((t) => (
+                        <option key={t} value={t}>
+                            {t.charAt(0).toUpperCase() + t.slice(1)}
+                        </option>
+                    ))}
+                </select>
+            </div>
 
             <div
                 style={{

@@ -1,20 +1,22 @@
 import { sendToBackground } from "@plasmohq/messaging";
 import { useState, useRef, useEffect, useCallback } from "react";
 import { ConditionBuilder } from "wi-condition-builder";
-import { getStorageValue } from "~chrome/storage";
-import { useChromeMessage } from "~hooks/useChromeMessage";
+import { useTheme } from "~contexts/ThemeContext";
+import { useAutoScroll } from "~hooks/useAutoScroll";
 import { useCommandsList } from "~hooks/useCommandsList";
 import { useEscape } from "~hooks/useEscape";
 import { useHistoryList } from "~hooks/useHistoryList";
 import { useKeyDown } from "~hooks/useKeyDown";
+import { useModeSwitch } from "~hooks/useModeSwitch";
+import { useOverlayMessages } from "~hooks/useOverlayMessages";
+import { useShortcut } from "~hooks/useShortcut";
 import { useTabList, type DisplayItem } from "~hooks/useTabList";
+import { useThemeNavigation } from "~hooks/useThemeNavigation";
 import { useVisibilityChange } from "~hooks/useVisibilityChange";
+import { themes } from "~themes/registry";
 import { Command } from "~utils/commands";
-import { parseKeyCombo } from "~utils/parseKyCombo";
-
-type Mode = "tabs" | "history" | "commands";
-
-const MODE_ORDER: Mode[] = ["tabs", "history", "commands"];
+import { getCommandAction, getCommandCompletion } from "~utils/executeCommand";
+import { type Mode, MODE_ORDER, cycleMode } from "~utils/mode";
 
 const styles = {
     overlay: {
@@ -24,17 +26,19 @@ const styles = {
         display: "flex",
         alignItems: "center",
         justifyContent: "center",
-        background: "rgba(0, 0, 0, 0.5)",
+        background: "var(--rofi-overlay)",
+        backdropFilter: "var(--rofi-overlay-backdrop)",
+        WebkitBackdropFilter: "var(--rofi-overlay-backdrop)",
     },
     window: {
-        width: 600,
+        width: "var(--rofi-window-width)",
         maxHeight: "60vh",
-        background: "#1e1e2e",
-        borderRadius: 12,
+        background: "var(--rofi-bg)",
+        borderRadius: "var(--rofi-radius)",
         overflow: "hidden",
-        fontFamily: "sans-serif",
-        fontSize: 14,
-        boxShadow: "0 8px 32px rgba(0,0,0,0.4)",
+        fontFamily: "var(--rofi-font)",
+        fontSize: "var(--rofi-font-size)",
+        boxShadow: "var(--rofi-shadow)",
         display: "flex",
         flexDirection: "column" as const,
     },
@@ -42,10 +46,10 @@ const styles = {
         width: "100%",
         padding: "14px 16px",
         border: "none",
-        borderBottom: "1px solid #313244",
-        background: "#181825",
-        color: "#cdd6f4",
-        fontSize: 16,
+        borderBottom: "1px solid var(--rofi-border)",
+        background: "var(--rofi-bg-alt)",
+        color: "var(--rofi-fg)",
+        fontSize: "var(--rofi-font-size-lg)",
         outline: "none",
         boxSizing: "border-box" as const,
     },
@@ -59,8 +63,8 @@ const styles = {
         gap: 10,
         padding: "10px 16px",
         cursor: "pointer",
-        background: selected ? "#313244" : "transparent",
-        color: "#cdd6f4",
+        background: selected ? "var(--rofi-bg-selected)" : "transparent",
+        color: "var(--rofi-fg)",
     }),
     favicon: {
         width: 16,
@@ -78,8 +82,8 @@ const styles = {
         flex: 1,
     },
     url: {
-        color: "#6c7086",
-        fontSize: 12,
+        color: "var(--rofi-fg-muted)",
+        fontSize: "var(--rofi-font-size-sm)",
         overflow: "hidden",
         textOverflow: "ellipsis",
         whiteSpace: "nowrap" as const,
@@ -87,25 +91,25 @@ const styles = {
     },
     bar: {
         display: "flex",
-        borderTop: "1px solid #313244",
+        borderTop: "1px solid var(--rofi-border)",
     },
     windowHeader: {
         padding: "6px 16px",
         fontSize: 11,
         fontWeight: 600,
-        color: "#585b70",
+        color: "var(--rofi-fg-muted-alt)",
         textTransform: "uppercase" as const,
         letterSpacing: "0.5px",
-        background: "#181825",
-        borderBottom: "1px solid #313244",
+        background: "var(--rofi-bg-alt)",
+        borderBottom: "1px solid var(--rofi-border)",
     },
     barItem: (active: boolean) => ({
         flex: 1,
         textAlign: "center" as const,
         padding: "8px 0",
         fontSize: 12,
-        color: active ? "#89b4fa" : "#6c7086",
-        background: active ? "#181825" : "transparent",
+        color: active ? "var(--rofi-accent)" : "var(--rofi-fg-muted)",
+        background: active ? "var(--rofi-bg-alt)" : "transparent",
         cursor: "pointer",
         userSelect: "none" as const,
     }),
@@ -116,8 +120,12 @@ const RofiOverlay = () => {
     const [query, setQuery] = useState("");
     const [mode, setMode] = useState<Mode>("tabs");
     const [container, setContainer] = useState<HTMLDivElement | null>(null);
-    const shortcutRef = useRef("Ctrl+.");
-    const prevModeRef = useRef<Mode>("tabs");
+    const { shortcutRef } = useShortcut(setVisible);
+    const { setTheme, themeName } = useTheme();
+    const { showThemeList, setShowThemeList, themeListIndex, themeNames } =
+        useThemeNavigation(visible, mode, container);
+
+    const { prevModeRef } = useModeSwitch(query, showThemeList, mode, setMode);
 
     const containerRef = useCallback((el: HTMLDivElement | null) => {
         setContainer(el);
@@ -144,7 +152,7 @@ const RofiOverlay = () => {
         visible ? container : null,
     );
     const { commands, selectedIndex: commandsIndex } = useCommandsList(
-        visible && mode === "commands",
+        visible && mode === "commands" && !showThemeList,
         query,
         visible ? container : null,
     );
@@ -165,14 +173,6 @@ const RofiOverlay = () => {
     const listRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
-        getStorageValue<string>("toggleShortcut").then((val) => {
-            if (val) {
-                shortcutRef.current = val;
-            }
-        });
-    }, []);
-
-    useEffect(() => {
         if (visible) {
             setQuery("");
             setMode("tabs");
@@ -180,43 +180,12 @@ const RofiOverlay = () => {
         }
     }, [visible]);
 
-    // Auto-switch to commands mode when typing /
-    useEffect(() => {
-        if (query.startsWith("/") && mode !== "commands") {
-            prevModeRef.current = mode;
-            setMode("commands");
-        } else if (!query.startsWith("/") && mode === "commands") {
-            setMode(prevModeRef.current);
-        }
-    }, [query, mode]);
+    useAutoScroll(selectedIndex, currentItems.length, listRef);
 
-    useEffect(() => {
-        if (!listRef.current) {
-            return;
-        }
-
-        const el = listRef.current.children[selectedIndex] as HTMLElement;
-
-        el?.scrollIntoView({ block: "nearest" });
-    }, [selectedIndex, currentItems.length]);
-
-    useChromeMessage((msg) => {
-        if (msg.type === "toggle-rofi") {
-            setVisible((v) => !v);
-        }
-
-        if (msg.type === "shortcut-updated") {
-            shortcutRef.current = msg.shortcut;
-        }
-    });
-
-    // Shortcut toggle — всегда на document (глобальный хоткей)
-    useKeyDown((e) => {
-        const combo = parseKeyCombo(e);
-        if (combo && combo === shortcutRef.current) {
-            e.preventDefault();
-            setVisible((v) => !v);
-        }
+    useOverlayMessages({
+        toggleVisible: () => setVisible((v) => !v),
+        shortcutRef,
+        onThemeChanged: (theme) => setTheme(theme),
     });
 
     // Режим переключения — на контейнере оверлея
@@ -226,38 +195,25 @@ const RofiOverlay = () => {
                 return;
             }
 
-            if (e.key === "ArrowLeft") {
+            if (e.key === "ArrowLeft" || e.key === "ArrowRight") {
                 e.preventDefault();
 
-                const idx = MODE_ORDER.indexOf(mode);
-                const modeOrder = MODE_ORDER[(idx - 1 + MODE_ORDER.length) % MODE_ORDER.length]
-
-                setMode(modeOrder);
-                setQuery("");
-            }
-
-            if (e.key === "ArrowRight") {
-                e.preventDefault();
-
-                const idx = MODE_ORDER.indexOf(mode);
-
-                setMode(MODE_ORDER[(idx + 1) % MODE_ORDER.length]);
+                setMode(
+                    cycleMode(mode, e.key === "ArrowLeft" ? -1 : 1, MODE_ORDER),
+                );
                 setQuery("");
             }
         },
         visible ? container : null,
     );
 
-    const completeOrExecute = useCallback(
+    const dispatchCommand = useCallback(
         (cmd: (typeof commands)[number]) => {
             const fragment = query.slice(1).trim();
-            const cmdPart = fragment.split(/\s+/)[0];
+            const completion = getCommandCompletion(fragment, cmd);
 
-            // Auto-complete if command name is not fully typed
-            if (cmdPart !== cmd.id) {
-                const completed = `/${cmd.id} `;
-
-                setQuery(completed);
+            if (completion) {
+                setQuery(completion);
                 setTimeout(() => {
                     inputRef.current?.focus();
                 }, 0);
@@ -265,25 +221,36 @@ const RofiOverlay = () => {
                 return;
             }
 
-            // Execute command
-            if (cmd.id === "settings") {
-                sendToBackground({
-                    name: "open-url",
-                    body: { url: "chrome://settings" },
-                });
-                setVisible(false);
-            }
+            const actions = getCommandAction(cmd, query);
 
-            if (cmd.id === "open") {
-                const param = query.slice("/open".length).trim();
-                if (!param) {
-                    return;
+            for (const action of actions) {
+                switch (action.type) {
+                    case "set-query":
+                        setQuery(action.value);
+
+                        break;
+                    case "focus-input":
+                        setTimeout(() => {
+                            inputRef.current?.focus();
+                        }, 0);
+
+                        break;
+                    case "open-url":
+                        sendToBackground({
+                            name: "open-url",
+                            body: { url: action.url },
+                        });
+
+                        break;
+                    case "show-themes":
+                        setShowThemeList(true);
+
+                        break;
+                    case "hide-overlay":
+                        setVisible(false);
+
+                        break;
                 }
-
-                const url = param.includes("://") ? param : `https://${param}`;
-
-                sendToBackground({ name: "open-url", body: { url } });
-                setVisible(false);
             }
         },
         [query],
@@ -299,19 +266,39 @@ const RofiOverlay = () => {
             if (e.key === "Enter") {
                 e.preventDefault();
 
+                if (showThemeList) {
+                    const selected = themeNames[themeListIndex];
+
+                    if (selected) {
+                        setTheme(selected);
+                    }
+
+                    return;
+                }
+
                 const cmd = commands[commandsIndex];
-                
+
                 if (!cmd) {
                     return;
                 }
 
-                completeOrExecute(cmd);
+                dispatchCommand(cmd);
             }
         },
         visible ? container : null,
     );
 
-    useEscape(() => setVisible(false), visible ? container : null);
+    useEscape(
+        () => {
+            if (showThemeList) {
+                setShowThemeList(false);
+                setMode(prevModeRef.current);
+            } else {
+                setVisible(false);
+            }
+        },
+        visible ? container : null,
+    );
 
     useVisibilityChange((hidden) => {
         if (hidden && visible) {
@@ -365,12 +352,42 @@ const RofiOverlay = () => {
                                 Grant access
                             </button>
                         </div>
+                    ) : mode === "commands" && showThemeList ? (
+                        themeNames.map((name, i) => (
+                            <div
+                                key={name}
+                                style={styles.item(i === themeListIndex)}
+                                onClick={() => setTheme(name)}
+                            >
+                                <span style={styles.favicon}>
+                                    <span
+                                        style={{
+                                            width: 12,
+                                            height: 12,
+                                            borderRadius: "50%",
+                                            background:
+                                                themes[name].colors.accent,
+                                            display: "inline-block",
+                                        }}
+                                    />
+                                </span>
+                                <span style={styles.title}>
+                                    {name.charAt(0).toUpperCase() +
+                                        name.slice(1)}
+                                </span>
+                                <span style={{ ...styles.url, maxWidth: 300 }}>
+                                    {name === themeName
+                                        ? "Active"
+                                        : "Press Enter to apply"}
+                                </span>
+                            </div>
+                        ))
                     ) : mode === "commands" ? (
                         commands.map((cmd, i) => (
                             <div
                                 key={cmd.id}
                                 style={styles.item(i === commandsIndex)}
-                                onClick={() => completeOrExecute(cmd)}
+                                onClick={() => dispatchCommand(cmd)}
                             >
                                 <span style={styles.favicon}>{cmd.icon}</span>
                                 <span style={styles.title}>{cmd.title}</span>

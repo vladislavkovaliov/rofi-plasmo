@@ -10,7 +10,7 @@ export function useKeyDown(
 
     useEffect(() => {
         const target = element === undefined ? document : element;
-        
+
         if (!target) {
             return;
         }

@@ -14,10 +14,10 @@ export type WindowTabsData = {
     focusedWindowId: number | null;
 };
 
-const handler: PlasmoMessaging.MessageHandler<
-    object,
-    WindowTabsData
-> = async () => {
+const handler: PlasmoMessaging.MessageHandler<object, WindowTabsData> = async (
+    _req,
+    res,
+) => {
     const [tabs, focusedWindow] = await Promise.all([
         chrome.tabs.query({}).catch(() => [] as chrome.tabs.Tab[]),
         chrome.windows.getLastFocused().catch(() => null),

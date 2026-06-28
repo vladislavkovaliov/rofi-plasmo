@@ -18,4 +18,10 @@ export const COMMANDS: Command[] = [
         icon: "⚙️",
         description: "/settings — opens chrome://settings in a new tab",
     },
+    {
+        id: "themes",
+        title: "Select Theme",
+        icon: "🎨",
+        description: "/themes — change the overlay theme",
+    },
 ];

@@ -20,11 +20,12 @@ export function useHistoryList(
             return items;
         }
 
-        return items.filter(
-            (item) => {
-                return item.title?.toLowerCase().includes(q) || item.url?.toLowerCase().includes(q);
-            }
-        );
+        return items.filter((item) => {
+            return (
+                item.title?.toLowerCase().includes(q) ||
+                item.url?.toLowerCase().includes(q)
+            );
+        });
     }, [items, query]);
 
     useEffect(() => {
@@ -64,7 +65,7 @@ export function useHistoryList(
         const res = await sendToBackground<object, { granted: boolean }>({
             name: "request-history-permission",
         });
-        
+
         if (res.granted) {
             setPermissionGranted(true);
 
