@@ -1,0 +1,24 @@
+name: Release
+
+on:
+  workflow_dispatch:
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+
+    steps:
+      - uses: actions/checkout@v6
+
+      - uses: vladislavkovaliov/wi-github-actions/.github/actions/env-setup@main
+        with:
+          package-json-path: ./package.json
+          package-manager: pnpm
+
+      - name: Semantic Release
+        uses: ./.github/workflows/semantic-release
+        with:
+          branch: ${{ github.ref_name }}
