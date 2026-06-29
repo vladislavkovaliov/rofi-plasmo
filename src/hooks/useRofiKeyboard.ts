@@ -1,12 +1,9 @@
 import { useKeyDown } from "~hooks/useKeyDown";
 import { KEYS } from "~utils/keyboard";
-import { type Mode } from "~utils/mode";
 
 interface RofiKeyboardDeps {
     visible: boolean;
-    mode: Mode;
     container: HTMLElement | null;
-    showThemeList: boolean;
     onArrowUp: () => void;
     onArrowDown: () => void;
     onArrowLeft: () => void;
@@ -17,9 +14,7 @@ interface RofiKeyboardDeps {
 
 export function useRofiKeyboard({
     visible,
-    mode,
     container,
-    showThemeList,
     onArrowUp,
     onArrowDown,
     onArrowLeft,

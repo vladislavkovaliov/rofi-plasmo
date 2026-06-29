@@ -3,19 +3,15 @@ import type {
     TabData,
 } from "~background/messages/get-window-tabs";
 
-import { sendToBackground } from "~utils/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { DEBUG } from "~utils/debug";
+import { sendToBackground } from "~utils/messaging";
 
 export type DisplayItem =
     | { type: "header"; windowId: number; title: string }
     | { type: "tab"; tab: TabData };
 
-export function useTabList(
-    visible: boolean,
-    query: string,
-    container?: HTMLElement | null,
-) {
+export function useTabList(visible: boolean, query: string) {
     const [tabs, setTabs] = useState<TabData[]>([]);
     const [focusedWindowId, setFocusedWindowId] = useState<number | null>(null);
     const [selectedIndex, setSelectedIndex] = useState(0);
@@ -109,11 +105,6 @@ export function useTabList(
         }
     }
 
-    const selectableCount = useMemo(
-        () => displayItems.filter((i) => i.type === "tab").length,
-        [displayItems],
-    );
-
     useEffect(() => {
         if (!visible) {
             setTabs([]);
@@ -186,5 +177,11 @@ export function useTabList(
         });
     }, []);
 
-    return { items: displayItems, selectedIndex, switchToTab, selectNext, selectPrev };
+    return {
+        items: displayItems,
+        selectedIndex,
+        switchToTab,
+        selectNext,
+        selectPrev,
+    };
 }

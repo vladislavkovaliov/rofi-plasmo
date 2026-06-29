@@ -1,5 +1,6 @@
-import { ListItem } from "./ListItem";
 import { themes } from "~themes/registry";
+
+import { ListItem } from "./ListItem";
 
 interface ThemeItemListProps {
     themeNames: string[];

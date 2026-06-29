@@ -4,6 +4,7 @@ export function getCommandFragment(query: string): string {
 
 export function getCommandParam(query: string, commandId: string): string {
     const fragment = getCommandFragment(query);
+
     return fragment.slice(commandId.length).trim();
 }
 

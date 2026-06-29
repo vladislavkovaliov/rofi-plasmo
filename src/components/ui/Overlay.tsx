@@ -20,5 +20,9 @@ const styles = {
 };
 
 export function Overlay({ children, onClick }: OverlayProps) {
-    return <div style={styles.overlay} onClick={onClick}>{children}</div>;
+    return (
+        <div style={styles.overlay} onClick={onClick}>
+            {children}
+        </div>
+    );
 }

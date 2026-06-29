@@ -1,5 +1,6 @@
-import { ListItem } from "./ListItem";
 import { extractHostname } from "~utils/text";
+
+import { ListItem } from "./ListItem";
 
 interface HistoryItemListProps {
     items: chrome.history.HistoryItem[];

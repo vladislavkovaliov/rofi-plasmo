@@ -2,11 +2,7 @@ import { useState, useEffect, useCallback, useMemo } from "react";
 import { COMMANDS } from "~utils/commands";
 import { getCommandFragment } from "~utils/query";
 
-export function useCommandsList(
-    visible: boolean,
-    query: string,
-    container?: HTMLElement | null,
-) {
+export function useCommandsList(visible: boolean, query: string) {
     const [selectedIndex, setSelectedIndex] = useState(0);
 
     const filteredCommands = useMemo(() => {
@@ -15,7 +11,7 @@ export function useCommandsList(
         }
 
         const fragment = getCommandFragment(query);
-        
+
         if (!fragment) {
             return COMMANDS;
         }
@@ -41,5 +37,10 @@ export function useCommandsList(
         setSelectedIndex((i) => Math.max(i - 1, 0));
     }, []);
 
-    return { commands: filteredCommands, selectedIndex, selectNext, selectPrev };
+    return {
+        commands: filteredCommands,
+        selectedIndex,
+        selectNext,
+        selectPrev,
+    };
 }

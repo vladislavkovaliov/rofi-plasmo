@@ -1,7 +1,9 @@
 import type { DisplayItem } from "~hooks/useTabList";
+
+import { extractHostname } from "~utils/text";
+
 import { ListItem } from "./ListItem";
 import { WindowHeader } from "./WindowHeader";
-import { extractHostname } from "~utils/text";
 
 interface TabItemListProps {
     items: DisplayItem[];
@@ -9,14 +11,23 @@ interface TabItemListProps {
     onSwitchToTab: (tabId: number, windowId: number) => void;
 }
 
-export function TabItemList({ items, tabIndex, onSwitchToTab }: TabItemListProps) {
+export function TabItemList({
+    items,
+    tabIndex,
+    onSwitchToTab,
+}: TabItemListProps) {
     let itemCounter = 0;
 
     return (
         <>
             {items.map((item, i) => {
                 if (item.type === "header") {
-                    return <WindowHeader key={`h-${item.windowId}`} title={item.title} />;
+                    return (
+                        <WindowHeader
+                            key={`h-${item.windowId}`}
+                            title={item.title}
+                        />
+                    );
                 }
 
                 const tab = item.tab;

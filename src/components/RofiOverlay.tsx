@@ -1,20 +1,7 @@
-import { sendToBackground } from "~utils/messaging";
+import type { Command } from "~utils/commands";
+
 import { useState, useRef, useEffect } from "react";
 import { ConditionBuilder } from "wi-condition-builder";
-import { useTheme } from "~contexts/ThemeContext";
-import { useAutoScroll } from "~hooks/useAutoScroll";
-import { useCommandsList } from "~hooks/useCommandsList";
-import { useHistoryList } from "~hooks/useHistoryList";
-import { useModeSwitch } from "~hooks/useModeSwitch";
-import { useOverlayMessages } from "~hooks/useOverlayMessages";
-import { useShortcut } from "~hooks/useShortcut";
-import { useCommandRunner } from "~hooks/useCommandRunner";
-import { useRofiKeyboard } from "~hooks/useRofiKeyboard";
-import { useTabList, type DisplayItem } from "~hooks/useTabList";
-import { useThemeNavigation } from "~hooks/useThemeNavigation";
-import { useVisibilityChange } from "~hooks/useVisibilityChange";
-import type { Command } from "~utils/commands";
-import { type Mode, MODE_ORDER, cycleMode } from "~utils/mode";
 import {
     Overlay,
     OverlayWindow,
@@ -26,6 +13,20 @@ import {
     TabItemList,
     HistoryItemList,
 } from "~components/ui";
+import { useTheme } from "~contexts/ThemeContext";
+import { useAutoScroll } from "~hooks/useAutoScroll";
+import { useCommandRunner } from "~hooks/useCommandRunner";
+import { useCommandsList } from "~hooks/useCommandsList";
+import { useHistoryList } from "~hooks/useHistoryList";
+import { useModeSwitch } from "~hooks/useModeSwitch";
+import { useOverlayMessages } from "~hooks/useOverlayMessages";
+import { useRofiKeyboard } from "~hooks/useRofiKeyboard";
+import { useShortcut } from "~hooks/useShortcut";
+import { useTabList, type DisplayItem } from "~hooks/useTabList";
+import { useThemeNavigation } from "~hooks/useThemeNavigation";
+import { useVisibilityChange } from "~hooks/useVisibilityChange";
+import { sendToBackground } from "~utils/messaging";
+import { type Mode, MODE_ORDER, cycleMode } from "~utils/mode";
 
 const RofiOverlay = () => {
     const [visible, setVisible] = useState(false);
@@ -44,7 +45,7 @@ const RofiOverlay = () => {
         themeNames,
         selectNext: selectNextTheme,
         selectPrev: selectPrevTheme,
-    } = useThemeNavigation(visible, mode, container);
+    } = useThemeNavigation();
     const { prevModeRef } = useModeSwitch(query, showThemeList, mode, setMode);
 
     const {
@@ -53,11 +54,7 @@ const RofiOverlay = () => {
         switchToTab,
         selectNext: selectNextTab,
         selectPrev: selectPrevTab,
-    } = useTabList(
-        visible && mode === "tabs",
-        query,
-        visible ? container : null,
-    );
+    } = useTabList(visible && mode === "tabs", query);
     const {
         items: historyItems,
         selectedIndex: historyIndex,
@@ -66,11 +63,7 @@ const RofiOverlay = () => {
         requestPermission,
         selectNext: selectNextHistory,
         selectPrev: selectPrevHistory,
-    } = useHistoryList(
-        visible && mode === "history",
-        query,
-        visible ? container : null,
-    );
+    } = useHistoryList(visible && mode === "history", query);
     const {
         commands,
         selectedIndex: commandsIndex,
@@ -79,7 +72,6 @@ const RofiOverlay = () => {
     } = useCommandsList(
         visible && mode === "commands" && !showThemeList,
         query,
-        visible ? container : null,
     );
 
     const currentItems = new ConditionBuilder<
@@ -105,9 +97,7 @@ const RofiOverlay = () => {
 
     useRofiKeyboard({
         visible,
-        mode,
         container: visible ? container : null,
-        showThemeList,
         onArrowUp: () => {
             if (mode === "tabs") {
                 selectPrevTab();
@@ -185,6 +175,7 @@ const RofiOverlay = () => {
             if (mode !== "commands") {
                 setMode("commands");
             }
+
             setQuery("/");
         }
     }, [query, mode]);
@@ -216,11 +207,7 @@ const RofiOverlay = () => {
     return (
         <Overlay onClick={() => setVisible(false)}>
             <OverlayWindow ref={setContainer}>
-                <SearchInput
-                    ref={inputRef}
-                    query={query}
-                    onChange={setQuery}
-                />
+                <SearchInput ref={inputRef} query={query} onChange={setQuery} />
                 <div ref={listRef} style={{ overflow: "auto", flex: 1 }}>
                     {mode === "history" && !permissionGranted && (
                         <PermissionScreen onRequest={requestPermission} />

@@ -1,5 +1,6 @@
-import { useCallback, type RefObject } from "react";
 import type { Command } from "~utils/commands";
+
+import { useCallback, type RefObject } from "react";
 import { getCommandAction, getCommandCompletion } from "~utils/executeCommand";
 import { getCommandFragment } from "~utils/query";
 

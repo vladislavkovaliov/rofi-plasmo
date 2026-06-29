@@ -43,7 +43,13 @@ const styles = {
     },
 };
 
-export function ListItem({ selected, onClick, favicon, title, url }: ListItemProps) {
+export function ListItem({
+    selected,
+    onClick,
+    favicon,
+    title,
+    url,
+}: ListItemProps) {
     return (
         <div style={styles.item(selected)} onClick={onClick}>
             <span style={styles.favicon}>{favicon}</span>

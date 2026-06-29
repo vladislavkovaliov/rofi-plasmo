@@ -4,9 +4,7 @@ export function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
         .then(([tab]) => tab);
 }
 
-export function sendMessageToActiveTab(
-    msg: unknown,
-): void {
+export function sendMessageToActiveTab(msg: unknown): void {
     getActiveTab().then((tab) => {
         if (tab?.id) {
             chrome.tabs.sendMessage(tab.id, msg);

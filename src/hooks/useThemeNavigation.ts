@@ -1,6 +1,5 @@
 import { useState, useMemo, useCallback } from "react";
 import { themes } from "~themes/registry";
-import { type Mode } from "~utils/mode";
 
 interface UseThemeNavigationResult {
     showThemeList: boolean;
@@ -12,11 +11,7 @@ interface UseThemeNavigationResult {
     selectPrev: () => void;
 }
 
-export function useThemeNavigation(
-    visible: boolean,
-    mode: Mode,
-    container: HTMLElement | null,
-): UseThemeNavigationResult {
+export function useThemeNavigation(): UseThemeNavigationResult {
     const [showThemeList, setShowThemeList] = useState(false);
     const [themeListIndex, setThemeListIndex] = useState(0);
     const themeNames = useMemo(() => Object.keys(themes), []);

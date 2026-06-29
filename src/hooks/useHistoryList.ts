@@ -1,14 +1,9 @@
 import type { HistoryData } from "~background/messages/get-history";
 
-import { sendToBackground } from "~utils/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
+import { sendToBackground } from "~utils/messaging";
 
-
-export function useHistoryList(
-    visible: boolean,
-    query: string,
-    container?: HTMLElement | null,
-) {
+export function useHistoryList(visible: boolean, query: string) {
     const [items, setItems] = useState<chrome.history.HistoryItem[]>([]);
     const [selectedIndex, setSelectedIndex] = useState(0);
     const [permissionGranted, setPermissionGranted] = useState(true);
@@ -37,12 +32,10 @@ export function useHistoryList(
             return;
         }
 
-        sendToBackground({ name: "get-history" }).then(
-            (res) => {
-                setItems(res.items);
-                setPermissionGranted(res.granted);
-            },
-        );
+        sendToBackground({ name: "get-history" }).then((res) => {
+            setItems(res.items);
+            setPermissionGranted(res.granted);
+        });
     }, [visible]);
 
     useEffect(() => {
