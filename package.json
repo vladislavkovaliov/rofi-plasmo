@@ -1,6 +1,6 @@
 {
   "name": "rofi-switcher",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "A window switcher and launcher inspired by Rofi",
   "scripts": {
     "dev": "plasmo dev",
