@@ -67,6 +67,10 @@
       "sharp"
     ]
   },
+  "engines": {
+    "node": "24",
+    "npm": "11"
+  },
   "manifest": {
     "name": "Rofi Switcher",
     "version": "0.1.0",
