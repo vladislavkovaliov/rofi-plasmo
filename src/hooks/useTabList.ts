@@ -3,7 +3,7 @@ import type {
     TabData,
 } from "~background/messages/get-window-tabs";
 
-import { sendToBackground } from "@plasmohq/messaging";
+import { sendToBackground } from "~utils/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
 import { DEBUG } from "~utils/debug";
 
@@ -123,7 +123,7 @@ export function useTabList(
             return;
         }
 
-        sendToBackground<object, WindowTabsData>({
+        sendToBackground<WindowTabsData>({
             name: "get-window-tabs",
         }).then((res) => {
             if (DEBUG) {

@@ -6,10 +6,10 @@ export function getActiveTab(): Promise<chrome.tabs.Tab | undefined> {
 
 export function sendMessageToActiveTab(
     msg: unknown,
-): ReturnType<typeof chrome.tabs.sendMessage> {
-    return getActiveTab().then((tab) => {
+): void {
+    getActiveTab().then((tab) => {
         if (tab?.id) {
-            return chrome.tabs.sendMessage(tab.id, msg);
+            chrome.tabs.sendMessage(tab.id, msg);
         }
     });
 }

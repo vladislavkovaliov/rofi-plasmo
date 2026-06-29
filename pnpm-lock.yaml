@@ -54,6 +54,9 @@ importers:
       '@types/chrome':
         specifier: ^0.2.0
         version: 0.2.0
+      '@types/node':
+        specifier: ^26.0.1
+        version: 26.0.1
       '@types/react':
         specifier: ^18.2.0
         version: 18.3.31

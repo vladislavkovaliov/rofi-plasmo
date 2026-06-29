@@ -1,4 +1,4 @@
-import { sendToBackground } from "@plasmohq/messaging";
+import { sendToBackground } from "~utils/messaging";
 import { useState, useRef, useEffect } from "react";
 import { ConditionBuilder } from "wi-condition-builder";
 import { useTheme } from "~contexts/ThemeContext";

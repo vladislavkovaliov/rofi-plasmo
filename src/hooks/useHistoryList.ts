@@ -1,6 +1,6 @@
 import type { HistoryData } from "~background/messages/get-history";
 
-import { sendToBackground } from "@plasmohq/messaging";
+import { sendToBackground } from "~utils/messaging";
 import { useState, useEffect, useCallback, useMemo } from "react";
 
 
@@ -37,7 +37,7 @@ export function useHistoryList(
             return;
         }
 
-        sendToBackground<object, HistoryData>({ name: "get-history" }).then(
+        sendToBackground({ name: "get-history" }).then(
             (res) => {
                 setItems(res.items);
                 setPermissionGranted(res.granted);
@@ -62,14 +62,14 @@ export function useHistoryList(
     }, []);
 
     const requestPermission = useCallback(async () => {
-        const res = await sendToBackground<object, { granted: boolean }>({
+        const res = await sendToBackground<{ granted: boolean }>({
             name: "request-history-permission",
         });
 
         if (res.granted) {
             setPermissionGranted(true);
 
-            const data = await sendToBackground<object, HistoryData>({
+            const data = await sendToBackground<HistoryData>({
                 name: "get-history",
             });
 
