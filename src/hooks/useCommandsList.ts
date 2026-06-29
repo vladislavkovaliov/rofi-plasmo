@@ -15,6 +15,7 @@ export function useCommandsList(
         }
 
         const fragment = getCommandFragment(query);
+        
         if (!fragment) {
             return COMMANDS;
         }

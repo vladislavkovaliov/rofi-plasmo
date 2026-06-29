@@ -41,7 +41,6 @@ const RofiOverlay = () => {
         showThemeList,
         setShowThemeList,
         themeListIndex,
-        setThemeListIndex,
         themeNames,
         selectNext: selectNextTheme,
         selectPrev: selectPrevTheme,
@@ -165,6 +164,30 @@ const RofiOverlay = () => {
             }
         },
     });
+
+    useEffect(() => {
+        if (!query.startsWith("/")) {
+            return;
+        }
+
+        const fragment = query.slice(1).trim().toLowerCase();
+
+        if (fragment === "tabs" && mode !== "tabs") {
+            setMode("tabs");
+            setQuery("");
+        } else if (
+            (fragment === "hist" || fragment === "history") &&
+            mode !== "history"
+        ) {
+            setMode("history");
+            setQuery("");
+        } else if (fragment === "commands") {
+            if (mode !== "commands") {
+                setMode("commands");
+            }
+            setQuery("/");
+        }
+    }, [query, mode]);
 
     useEffect(() => {
         if (visible) {

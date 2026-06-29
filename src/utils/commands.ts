@@ -13,6 +13,18 @@ export const COMMANDS: Command[] = [
         description: "/open <url> — opens URL in a new tab",
     },
     {
+        id: "tabs",
+        title: "Open tabs",
+        icon: "🔗",
+        description: "/tabs — opens active tabs list",
+    },
+    {
+        id: "history",
+        title: "Open history",
+        icon: "🔗",
+        description: "/hist (/history) — opens history list",
+    },
+    {
         id: "settings",
         title: "Open Settings",
         icon: "⚙️",
